@@ -2,7 +2,7 @@ const User = require ('../models/user');
 
 exports.userSignup = (req,res) =>{
     var auth = req.body;
-    console.log("hgfhgf",auth);
+    console.log("hgfhgjhfjf",auth);
     const {mobileNumber} = req.body
 
     if(req.body["sign_up_by"] == "user"){
