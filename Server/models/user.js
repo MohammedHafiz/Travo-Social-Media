@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
         unique :true
     },
     mobileNumber:{
-        type:String,
+        type:Number,
       
         unique :true,
         max:10

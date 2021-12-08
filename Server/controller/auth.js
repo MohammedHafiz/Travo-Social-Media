@@ -1,6 +1,7 @@
 const User = require ('../models/user');
 
 exports.userSignup = (req,res) =>{
+    console.log("dfk")
     var auth = req.body;
     console.log("hgfhgjhfjf",auth);
     const {mobileNumber} = req.body
@@ -9,8 +10,8 @@ exports.userSignup = (req,res) =>{
         User.findOne({mobileNumber})
         .then(userData=>{
             if(userData){
-
-                return res.status(401).json({message:"Number already exists"})
+                console.log("userData",userData)
+                return res.status(401).json({message:"Number already "})
             }
             const user = new User({mobileNumber})
             user.save().then((user)=>{
@@ -20,10 +21,10 @@ exports.userSignup = (req,res) =>{
             })
         })
     }
-    if(req.body["sign_up_by"] == "propertyOwner"){
-        User.findOne({mobileNumber:mobileNumber}).then(userData=>{
-            console.log(userData)
-           return res.status(401).json({message:"Number already exists"})
-        })
-    }
+    // if(req.body["sign_up_by"] == "propertyOwner"){
+    //     User.findOne({mobileNumber:mobileNumber}).then(userData=>{
+    //         console.log(userData)
+    //        return res.status(401).json({message:"Number already exists"})
+    //     })
+    // }
 }
