@@ -22,7 +22,9 @@ const authRoute = require('./router/auth')
 app.use(express.json());
 app.use('/api/auth',authRoute)
 
-
+app.get('/',(req,res)=>{
+    res.send("hey its me")
+})
 app.listen(PORT,()=>{
     console.log("Server is running at ",PORT);
 })
