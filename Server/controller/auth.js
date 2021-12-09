@@ -1,4 +1,9 @@
 const User = require ('../models/user');
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const serviceToken = process.env.TWILIO_SERVICE_TOKEN;
+const client = require('twilio')(accountSid, authToken);
+
 
 exports.userSignup = (req,res) =>{
     console.log("dfk")
@@ -15,7 +20,11 @@ exports.userSignup = (req,res) =>{
             }
             const user = new User({mobileNumber})
             user.save().then((user)=>{
-                res.status(200).json({message:"saved successfully"})
+                client.verify.services(serviceToken)
+                .verifications
+                .create({to:`+91${mobileNumber}`, channel: 'sms'})
+                .then(verification => console.log(verification));
+                res.status(200).json({message:"saved successfully and otp had sent"})
             }).catch(err=>{
                 console.log(err)
             })
@@ -27,4 +36,10 @@ exports.userSignup = (req,res) =>{
     //        return res.status(401).json({message:"Number already exists"})
     //     })
     // }
+}
+
+exports.otpSignup = (req,res)=>{
+    console.log(req.body.mobileNumber)
+    //console.log(accountSid,authToken,serviceToken)
+   
 }
