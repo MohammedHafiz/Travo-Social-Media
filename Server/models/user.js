@@ -6,24 +6,20 @@ const userSchema = new mongoose.Schema({
        
     },
     user_name :{
-        type:String,
-      
+        type:String, 
         unique :true
     },
     mobileNumber:{
-        type:Number,
-      
+        type:String,
         unique :true,
-        max:10
+        min:10
     },
     email:{
         type : String,
-    
         unique :true
     },
     password :{
         type : String,
-    
         min : 8 ,
         max : 16
     },
