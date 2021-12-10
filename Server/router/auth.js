@@ -6,6 +6,7 @@ const {userSignup,userSignupDetails} = require('../controller/auth')
 
 router.post('/signup',userSignup)
 
+// router.post('/mobile_signup',userSignupDetails)
 
 
 
