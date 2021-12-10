@@ -16,7 +16,7 @@ exports.userSignup = (req,res) =>{
         .then(userData=>{
             if(userData){
                 console.log("userData",userData)
-                return res.status(401).json({message:"Number already "})
+                return res.status(401).json({message:"Number already exists"})
             }
             const user = new User({mobileNumber})
             user.save().then((user)=>{
