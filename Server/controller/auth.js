@@ -1,9 +1,10 @@
 const User = require ('../models/user');
+const bcrypt = require('bcryptjs')
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceToken = process.env.TWILIO_SERVICE_TOKEN;
 
-const client = require('twilio')(accountSid, authToken);
+// const client = require('twilio')(accountSid, authToken);
 
 
 exports.userSignup = (req,res) =>{
@@ -21,10 +22,10 @@ exports.userSignup = (req,res) =>{
             }
             const user = new User({mobileNumber})
             user.save().then((user)=>{
-                client.verify.services(serviceToken)
-                .verifications
-                .create({to:`+91${mobileNumber}`, channel: 'sms'})
-                .then(verification => console.log(verification));
+                // client.verify.services(serviceToken)
+                // .verifications
+                // .create({to:`+91${mobileNumber}`, channel: 'sms'})
+                // .then(verification => console.log(verification));
                 res.status(200).json({message:"saved successfully and otp had sent"})
             }).catch(err=>{
                 console.log(err)
@@ -38,9 +39,37 @@ exports.userSignup = (req,res) =>{
     //     })
     // }
 }
-// exports.userSignupDetails = (req,res) =>{
-//     const {name,user_name,mobileNumber,email,password} = req.body
-//     User.findOne({mobileNumber}).
 
-// }
+exports.userSignupDetails = (req,res) =>{
+    console.log(req.body)
+    const {name,user_name,mobileNumber,email,password} = req.body
+    if(!email || !password || !user_name || !name ){
+        return res.status(422).json({error :" Please enter add all the fields"})
+    }
+    User.findOne({email}).then((savedUser)=>{
+        if(savedUser){
+            res.status(422).json({error:"User email already exists"})
+        }   
+    })
+    User.findOne({mobileNumber}).then((userData)=>{
+        bcrypt.hash(password,10).then(hashedPassword=>{
+            
+       
+        if(userData){
+            const userDetails = new User({
+                name,
+                user_name,
+                email,
+                password : hashedPassword
+            })
+        
+   
+    userDetails.save().then((result)=>{
+        res.status(200).json({message :"saved successfully"})
+   
+    })
+}
+    })
+})
+}
 
