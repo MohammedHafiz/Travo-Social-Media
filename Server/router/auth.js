@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 
 
-const {userSignup,otpSignup} = require('../controller/auth')
+const {userSignup,userSignupDetails} = require('../controller/auth')
 
 router.post('/signup',userSignup)
 
-router.post('/mobile_signup',otpSignup)
+router.post('/mobile_signup',userSignupDetails)
+
 
 
 

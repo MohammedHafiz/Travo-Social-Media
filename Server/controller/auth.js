@@ -2,7 +2,8 @@ const User = require ('../models/user');
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceToken = process.env.TWILIO_SERVICE_TOKEN;
-const client = require('twilio')(accountSid, authToken);
+
+//const client = require('twilio')(accountSid, authToken);
 
 
 exports.userSignup = (req,res) =>{
@@ -37,9 +38,9 @@ exports.userSignup = (req,res) =>{
     //     })
     // }
 }
+// exports.userSignupDetails = (req,res) =>{
+//     const {name,user_name,mobileNumber,email,password} = req.body
+//     User.findOne({mobileNumber}).
 
-exports.otpSignup = (req,res)=>{
-    console.log(req.body.mobileNumber)
-    //console.log(accountSid,authToken,serviceToken)
-   
-}
+// }
+
