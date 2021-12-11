@@ -30,22 +30,20 @@ exports.userSignup = (req, res) => {
     }
 }
 
-exports.userSignupDetails = (req, res) => {
+exports.userSignupDetails = asyncHandler(async(req, res) => {
     console.log(req.body)
     const { name, user_name, email, password } = req.body
+    const savedUser = await User.findOne({ email })
+    const savedName = await User.findOne({user_name})
     if (!email || !password || !user_name || !name) {
-        return res.status(422).json({ error: " Please enter all the fields" })
+        res.status(422).json({ error: " Please enter all the fields" })
+    } else if (savedUser) {
+        console.log("pooo");
+        res.json({ "msg" :"User email already exists"})
     }
-    User.findOne({ email }).then((savedUser) => {
-        if (savedUser) {
-            return res.status(422).json({ error: "User email already exists" })
-        }
-    })
-    User.findOne({ user_name }).then((savedUser) => {
-        if (savedUser) {
-            return res.status(422).json({ error: "Username already exists" })
-        }
-    })
+    else if (savedName) {
+        res.status(422).json({ msg :"User name already exists"})
+    } else {
 
     bcrypt.hash(password, 10).then(async (hashedPassword) => {
         await User.findByIdAndUpdate(req.body.userId, {
@@ -60,13 +58,13 @@ exports.userSignupDetails = (req, res) => {
         })
             .exec((err, result) => {
                 if (err) {
-                    return res.status(422).json({ error: err })
+                    res.status(422).json({ error: err })
                 } else {
                     res.status(200).json({ result: result })
                 }
             })
 
-    })
+    })}
 
-}
+})
 
