@@ -4,7 +4,7 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceToken = process.env.TWILIO_SERVICE_TOKEN;
 const asyncHandler = require('express-async-handler');
-
+const jwt = require('jsonwebtoken')
 // const client = require('twilio')(accountSid, authToken);
 
 
@@ -39,11 +39,10 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
     if (!email || !password || !user_name || !name) {
         res.status(422).json({ error: " Please enter all the fields" })
     } else if (savedUser) {
-        console.log("pooo");
-        res.json({ "msg" :"User email already exists"})
+        res.status(422).json({ message :"User email already exists"})
     }
     else if (savedName) {
-        res.status(422).json({ msg :"User name already exists"})
+        res.status(422).json({ message :"User name already exists"})
     } else {
 
     bcrypt.hash(password, 10).then(async (hashedPassword) => {
@@ -69,3 +68,23 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
 
 })
 
+
+exports.userSignin = asyncHandler(async(req,res)=>{
+    const {email,password} = req.body
+    if(!email || !password){
+       return res.status(401).json({result:"Please fill the details"})
+    }
+    const userData = await User.findOne({email})
+    if(!userData){
+        return res.status(401).json({message:"Entered email is wrong"})
+    }
+    const ifMatched = await bcrypt.compare(password,userData.password)
+    if(ifMatched){
+        //creating jwt token with payload as user_id
+        const token = jwt.sign({_id:userData._id},process.env.JWT_SECRET)
+        const {mobileNumber,following,followers,email,user_name,name} = userData
+        res.status(200).json({token,userDetails:{mobileNumber,following,followers,email,user_name,name}})
+    }else{
+        res.status(401).json({message:"Eneterd password is incorrect"})
+    }
+})
