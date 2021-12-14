@@ -24,7 +24,8 @@ exports.userSignup = async(req, res) => {
                     .verifications
                     .create({to:`+91${mobileNumber}`, channel: 'sms'})
                     .then(verification => console.log(verification));
-                    res.status(200).json({ message: "saved successfully and otp had sent",user })
+                    const {_id} = user 
+                    res.status(200).json({ message: "saved successfully and otp had sent",user:{_id} })
                 }).catch(err => {
                     console.log(err)
                 })
@@ -61,7 +62,9 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
                 if (err) {
                     res.status(422).json({ error: err })
                 } else {
-                    res.status(200).json({ result: result })
+                    const token = jwt.sign({_id:req.body.userId},process.env.JWT_SECRET)
+                    const {mobileNumber,following,followers,email,user_name,name} = result
+                    res.status(200).json({token,user: {mobileNumber,following,followers,email,user_name,name} })
                 }
             })
 
@@ -76,7 +79,7 @@ exports.otpVerification = async (req,res)=>{
     .verificationChecks
     .create({to:`+91${mobileNo}`, code: otp})
     if(verification_check.status == "approved"){
-        return res.status(200).json({message:"You are successfully signed in"})
+        return res.status(200).json({message:"Your mobile number is sucessfully verified"})
     }else{
         return res.status(401).json({error:"Please check the otp"})
     }
