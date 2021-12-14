@@ -3,11 +3,13 @@ const router = express.Router();
 const verifyToken = require('../middleware/verifyToken')
 
 
-const {userSignup,userSignupDetails,userSignin} = require('../controller/auth')
+const {userSignup,userSignupDetails,userSignin,otpVerification} = require('../controller/auth')
 
 router.post('/signup',userSignup)
 
 router.post('/mobile_signup',userSignupDetails)
+
+router.post('/otp-verify',otpVerification)
 
 router.post('/signin',userSignin)
 

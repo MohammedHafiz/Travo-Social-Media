@@ -8,11 +8,12 @@ const jwt = require('jsonwebtoken')
 const client = require('twilio')(accountSid, authToken);
 
 
-exports.userSignup = (req, res) => {
+exports.userSignup = async(req, res) => {
     const { mobileNumber } = req.body
+    console.log(mobileNumber)
     if (req.body["sign_up_by"] == "user") {
-        User.findOne({ mobileNumber })
-            .then(userData => {
+        const userData = await User.findOne({ mobileNumber })
+            console.log("userData",userData)
                 if (userData) {
                     console.log("userData", userData)
                     return res.status(401).json({ message: "Number already exists" })
@@ -27,7 +28,7 @@ exports.userSignup = (req, res) => {
                 }).catch(err => {
                     console.log(err)
                 })
-            })
+            
     }
 }
 
@@ -68,6 +69,19 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
 
 })
 
+
+exports.otpVerification = async (req,res)=>{
+    const {otp,mobileNo} = req.body
+    const verification_check = await client.verify.services(serviceToken)
+    .verificationChecks
+    .create({to:`+91${mobileNo}`, code: otp})
+    if(verification_check.status == "approved"){
+        return res.status(200).json({message:"You are successfully signed in"})
+    }else{
+        return res.status(401).json({error:"Please check the otp"})
+    }
+     
+}
 
 exports.userSignin = asyncHandler(async(req,res)=>{
     const {email,password} = req.body
