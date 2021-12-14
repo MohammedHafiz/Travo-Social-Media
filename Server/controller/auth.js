@@ -25,7 +25,7 @@ exports.userSignup = async(req, res) => {
                     .create({to:`+91${mobileNumber}`, channel: 'sms'})
                     .then(verification => console.log(verification));
                     const {_id} = user 
-                    res.status(200).json({ message: "saved successfully and otp had sent",user:{_id} })
+                    res.status(200).json({ message: "saved successfully and otp had sent",_id })
                 }).catch(err => {
                     console.log(err)
                 })
