@@ -37,8 +37,11 @@ const userSchema = new mongoose.Schema({
         type : String
     },
     is_active :{
-        type : Boolean
-    }
+        type : Boolean,
+        default:true
+    },
+    resetToken : String,
+    expireToken : Date
 
 },
      {timestamps:true}

@@ -6,16 +6,23 @@ const serviceToken = process.env.TWILIO_SERVICE_TOKEN;
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken')
 const client = require('twilio')(accountSid, authToken);
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+const crypto = require('crypto');
+
+
+const transporter = nodemailer.createTransport(sendgridTransport({
+    auth:{
+        api_key:process.env.EMAIL_TOKEN
+    }
+}))
 
 
 exports.userSignup = async(req, res) => {
     const { mobileNumber } = req.body
-    console.log(mobileNumber)
     if (req.body["sign_up_by"] == "user") {
         const userData = await User.findOne({ mobileNumber })
-            console.log("userData",userData)
                 if (userData) {
-                    console.log("userData", userData)
                     return res.status(401).json({ message: "Number already exists" })
                 }
                 const user = new User({ mobileNumber })
@@ -34,7 +41,6 @@ exports.userSignup = async(req, res) => {
 }
 
 exports.userSignupDetails = asyncHandler(async(req, res) => {
-    console.log(req.body)
     const { name, user_name, email, password } = req.body
     const savedUser = await User.findOne({ email })
     const savedName = await User.findOne({user_name})
@@ -59,11 +65,18 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
             new: true
         })
             .exec((err, result) => {
+                console.log("result",result)
                 if (err) {
                     res.status(422).json({ error: err })
                 } else {
                     const token = jwt.sign({_id:req.body.userId},process.env.JWT_SECRET)
                     const {mobileNumber,following,followers,email,user_name,name} = result
+                     transporter.sendMail({
+                        to:email,
+                        from:"travo.socialmedia@gmail.com",
+                        subject:"Signup success",
+                        html:"<h1>Welcome to Travo</h1><br><h2> We are waiting for you</h2>"
+                    })
                     res.status(200).json({token,user: {mobileNumber,following,followers,email,user_name,name} })
                 }
             })
@@ -105,3 +118,56 @@ exports.userSignin = asyncHandler(async(req,res)=>{
         res.status(401).json({message:"Eneterd password is incorrect"})
     }
 })
+
+exports.resetPassword = (req,res)=>{
+    crypto.randomBytes(32,(err,buffer)=>{
+        if(err){
+            console.log(err)
+        }
+        const token = buffer.toString("hex")
+        console.log(token)
+        console.log(buffer)
+        User.findOne({email:req.body.email}).then((user)=>{
+            if(!user){
+                return res.status(422).json({error:"User with this email doesn't exist"})
+            }   
+        user.resetToken = token;
+        user.expireToken = Date.now() + 3600000
+        user.save().then((result)=>{
+            transporter.sendMail({
+                to:user.email,
+                from:"travo.socialmedia@gmail.com",
+                subject:"Reset Password",
+                html:`
+                <p>You requested for password reset</p>
+                <h5>please click this <a href="http://localhost:3000/reset-password/${token}">link </a> to reset your password</h5>
+                `
+            })
+            res.json({message : "New password link has send to your registered email"})
+        })
+    })
+
+    })
+}
+
+exports.newPassword = (req,res)=>{
+    const newPassword = req.body.password;
+    const resetToken = req.body.resetToken;
+    User.findOne({resetToken:resetToken,expireToken:{$gt:Date.now()}})
+    .then(user=>{
+        if(!user){
+            return res.status(422).json({message:"Try again session expired"})
+        }
+        bcrypt.hash(newPassword,10).then(hashedPassword=>{
+            user.password = hashedPassword;
+            user.resetToken = undefined;
+            user.expireToken = undefined;
+            user.save().then((userDetails)=>{
+                res.status(200).json({message:"Password updated successfully"})
+            })
+        })
+    }).catch(err=>{
+        console.log(err)
+    })
+
+}
