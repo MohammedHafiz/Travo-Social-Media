@@ -143,6 +143,7 @@ exports.resetPassword = (req,res)=>{
                 <h5>please click this <a href="http://localhost:3000/reset-password/${token}">link </a> to reset your password</h5>
                 `
             })
+            //https://travosocialmedia.herokuapp.com/api/auth/
             res.json({message : "New password link has send to your registered email"})
         })
     })
