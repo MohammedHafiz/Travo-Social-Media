@@ -5,7 +5,7 @@ const {create_post} = require('../controller/post')
 
 router.post('/create_post',verifyToken,create_post);
 
-router.post('/my_post',verifyToken,my_post)
+
 
 
 

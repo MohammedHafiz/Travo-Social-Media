@@ -18,3 +18,7 @@ exports.create_post = (req,res)=>{
     })
 
 }
+
+exports.my_post=(req,res)=>{
+    
+}
