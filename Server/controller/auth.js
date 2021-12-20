@@ -125,8 +125,6 @@ exports.resetPassword = (req,res)=>{
             console.log(err)
         }
         const token = buffer.toString("hex")
-        console.log(token)
-        console.log(buffer)
         User.findOne({email:req.body.email}).then((user)=>{
             if(!user){
                 return res.status(422).json({error:"User with this email doesn't exist"})
@@ -140,10 +138,9 @@ exports.resetPassword = (req,res)=>{
                 subject:"Reset Password",
                 html:`
                 <p>You requested for password reset</p>
-                <h5>please click this <a href="http://localhost:3000/reset-password/${token}">link </a> to reset your password</h5>
-                `
+                <h5>please click this <a href="https://travosocialmedia.herokuapp.com/api/auth/reset-password/${token}">link </a> to reset your password</h5>`
+              // <h5>please click this <a href="http://localhost:3000/reset-password/${token}">link </a> to reset your password</h5>
             })
-            //https://travosocialmedia.herokuapp.com/api/auth/
             res.json({message : "New password link has send to your registered email"})
         })
     })

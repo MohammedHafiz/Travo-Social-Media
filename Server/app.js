@@ -19,9 +19,11 @@ mongoose.connection.on('error',(err)=>{
 })
 
 const authRoute = require('./router/auth')
+const postRoute = require('./router/post')
 
 app.use(express.json());
 app.use('/api/auth',authRoute)
+app.use('/api/post',postRoute)
 
 app.get('/',(req,res)=>{
     res.send("hey its me")
