@@ -25,17 +25,12 @@ exports.userSignup = async(req, res) => {
                 if (userData) {
                     return res.status(401).json({ error: "Number already exists" })
                 }
-                const user = new User({ mobileNumber })
-                user.save().then((user) => {
                     client.verify.services(serviceToken)
                     .verifications
                     .create({to:`+91${mobileNumber}`, channel: 'sms'})
                     .then(verification => console.log(verification));
-                    const {_id} = user 
-                    res.status(200).json({ message: "saved successfully and otp had sent",_id,verification })
-                }).catch(err => {
-                    console.log(err)
-                })
+                    res.status(200).json({ message: "saved successfully and otp had sent",mobileNumber })
+           
             
     }
 }
@@ -87,12 +82,17 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
 
 
 exports.otpVerification = async (req,res)=>{
-    const {otp,mobileNo} = req.body
+    const {otp,mobileNumber} = req.body
     const verification_check = await client.verify.services(serviceToken)
     .verificationChecks
-    .create({to:`+91${mobileNo}`, code: otp})
+    .create({to:`+91${mobileNumber}`, code: otp})
     if(verification_check.status == "approved"){
-        return res.status(200).json({message:"Your mobile number is sucessfully verified"})
+        const user = new User({mobileNumber})
+        user.save().then((user) => {
+            console.log(user)
+            const {_id} = user
+            return res.status(200).json({message:"Your mobile number is sucessfully verified",_id})
+        })
     }else{
         return res.status(401).json({error:"Please check the otp"})
     }
