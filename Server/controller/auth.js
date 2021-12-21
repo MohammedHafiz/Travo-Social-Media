@@ -113,7 +113,7 @@ exports.userSignin = asyncHandler(async(req,res)=>{
         //creating jwt token with payload as user_id
         const token = jwt.sign({_id:userData._id},process.env.JWT_SECRET)
         const {mobileNumber,following,followers,email,user_name,name,_id} = userData
-        res.status(200).json({token,userDetails:{mobileNumber,following,followers,email,user_name,name,_id}})
+        res.status(200).json({token,user:{mobileNumber,following,followers,email,user_name,name,_id}})
     }else{
         res.status(401).json({error:"Eneterd password is incorrect"})
     }

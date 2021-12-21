@@ -72,3 +72,22 @@ exports.postdislike=(req,res)=>{
         res.status(200).json({result:result})
     })
 }
+
+exports.postComment=(req,res)=>{
+    const comment = {
+        text : req.body.text,
+        postedBy : req.user._id
+    }   
+    Post.findByIdAndUpdate(req.body.postId,{
+        $push:{comments:comment}
+    },{
+        new:true
+    })
+    .exec((err,result)=>{
+        if(err){
+        return res.status(422).json({error:err})
+        }else{
+            res.json(result)
+        }
+    })
+}
