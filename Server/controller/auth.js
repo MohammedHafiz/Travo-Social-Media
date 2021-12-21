@@ -23,7 +23,7 @@ exports.userSignup = async(req, res) => {
     if (req.body["sign_up_by"] == "user") {
         const userData = await User.findOne({ mobileNumber })
                 if (userData) {
-                    return res.status(401).json({ message: "Number already exists" })
+                    return res.status(401).json({ error: "Number already exists" })
                 }
                 const user = new User({ mobileNumber })
                 user.save().then((user) => {
@@ -47,10 +47,10 @@ exports.userSignupDetails = asyncHandler(async(req, res) => {
     if (!email || !password || !user_name || !name) {
         res.status(422).json({ error: " Please enter all the fields" })
     } else if (savedUser) {
-        res.status(422).json({ message :"User email already exists"})
+        res.status(422).json({ error :"User email already exists"})
     }
     else if (savedName) {
-        res.status(422).json({ message :"User name already exists"})
+        res.status(422).json({ error :"User name already exists"})
     } else {
 
     bcrypt.hash(password, 10).then(async (hashedPassword) => {
@@ -102,20 +102,20 @@ exports.otpVerification = async (req,res)=>{
 exports.userSignin = asyncHandler(async(req,res)=>{
     const {email,password} = req.body
     if(!email || !password){
-       return res.status(401).json({result:"Please fill the details"})
+       return res.status(401).json({error:"Please fill the details"})
     }
     const userData = await User.findOne({email})
     if(!userData){
-        return res.status(401).json({message:"Entered email is wrong"})
+        return res.status(401).json({error:"Entered email is wrong"})
     }
     const ifMatched = await bcrypt.compare(password,userData.password)
     if(ifMatched){
         //creating jwt token with payload as user_id
         const token = jwt.sign({_id:userData._id},process.env.JWT_SECRET)
-        const {mobileNumber,following,followers,email,user_name,name} = userData
-        res.status(200).json({token,userDetails:{mobileNumber,following,followers,email,user_name,name}})
+        const {mobileNumber,following,followers,email,user_name,name,_id} = userData
+        res.status(200).json({token,userDetails:{mobileNumber,following,followers,email,user_name,name,_id}})
     }else{
-        res.status(401).json({message:"Eneterd password is incorrect"})
+        res.status(401).json({error:"Eneterd password is incorrect"})
     }
 })
 
@@ -141,7 +141,7 @@ exports.resetPassword = (req,res)=>{
                 <h5>please click this <a href="https://travosocialmedia.herokuapp.com/api/auth/reset-password/${token}">link </a> to reset your password</h5>`
               // <h5>please click this <a href="http://localhost:3000/reset-password/${token}">link </a> to reset your password</h5>
             })
-            res.json({message : "New password link has send to your registered email"})
+            res.json({error : "New password link has send to your registered email"})
         })
     })
 
@@ -154,7 +154,7 @@ exports.newPassword = (req,res)=>{
     User.findOne({resetToken:resetToken,expireToken:{$gt:Date.now()}})
     .then(user=>{
         if(!user){
-            return res.status(422).json({message:"Try again session expired"})
+            return res.status(422).json({error:"Try again session expired"})
         }
         bcrypt.hash(newPassword,10).then(hashedPassword=>{
             user.password = hashedPassword;
@@ -168,4 +168,45 @@ exports.newPassword = (req,res)=>{
         console.log(err)
     })
 
+}
+
+exports.followUser= (req,res)=>{
+    User.findByIdAndUpdate(req.body.followerId,{
+        $addToSet:{followers:req.user._id}
+    },{
+        new:true
+    },async (err,result)=>{
+        if(err){
+            res.status(401).json({err:err})
+        }
+        const results = await User.findByIdAndUpdate(req.user._id,{
+            $addToSet:{following:req.body.followerId}
+        },{
+            new:true
+        }).select("-password")
+            res.status(200).json({result:results})
+       
+        
+    })
+}
+
+exports.unfollowUser = (req,res)=>{
+    User.findByIdAndUpdate(req.body.unfollowId,{
+        $pull:{followers:req.user._id}
+    },{
+        new:true
+    },(err,result)=>{
+        if(err){
+            res.status(401).json({error:err})
+        }
+        User.findByIdAndUpdate(req.user._id,{
+            $pull:{following:req.body.unfollowId}
+        },{
+            new:true
+        })
+        .select('-password')
+        .then(result=>{
+            res.status(200).json({result:result})
+        })
+    })
 }
