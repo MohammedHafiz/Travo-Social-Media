@@ -32,7 +32,7 @@ exports.userSignup = async(req, res) => {
                     .create({to:`+91${mobileNumber}`, channel: 'sms'})
                     .then(verification => console.log(verification));
                     const {_id} = user 
-                    res.status(200).json({ message: "saved successfully and otp had sent",_id })
+                    res.status(200).json({ message: "saved successfully and otp had sent",_id,verification })
                 }).catch(err => {
                     console.log(err)
                 })
@@ -141,7 +141,7 @@ exports.resetPassword = (req,res)=>{
                 <h5>please click this <a href="https://travosocialmedia.herokuapp.com/api/auth/reset-password/${token}">link </a> to reset your password</h5>`
               // <h5>please click this <a href="http://localhost:3000/reset-password/${token}">link </a> to reset your password</h5>
             })
-            res.json({error : "New password link has send to your registered email"})
+            res.json({message : "New password link has send to your registered email"})
         })
     })
 

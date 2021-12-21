@@ -74,20 +74,34 @@ exports.postdislike=(req,res)=>{
 }
 
 exports.postComment=(req,res)=>{
-    const comment = {
-        text : req.body.text,
-        postedBy : req.user._id
-    }   
+    console.log(req.user._id)
+    const comment ={
+        text :req.body.text,
+        postedBy:req.user._id   
+    }
     Post.findByIdAndUpdate(req.body.postId,{
         $push:{comments:comment}
     },{
         new:true
     })
+    .populate("comments.postedBy","_id user_name")
     .exec((err,result)=>{
         if(err){
-        return res.status(422).json({error:err})
-        }else{
-            res.json(result)
+            return res.status(401).json({error:err})
         }
+        res.status(200).json({result:result})
+    })
+}
+
+exports.delete_comment=(req,res)=>{
+    Post.findByIdAndUpdate(req.body.postId,{
+        $pull:{comments:req.body.commentId}
+    },{
+        new:true
+    },(err,result)=>{
+        if(err){
+            return res.status(401).json({ error:err})
+        }
+        res.status(200).json({result:result})
     })
 }
